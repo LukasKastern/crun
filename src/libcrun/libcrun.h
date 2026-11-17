@@ -119,6 +119,7 @@ const char *libcrun_context_get_state_root (libcrun_context_t *ctx);
 void libcrun_context_set_bundle (libcrun_context_t *ctx, const char *value);
 void libcrun_context_set_console_socket (libcrun_context_t *ctx, const char *value);
 void libcrun_context_set_pid_file (libcrun_context_t *ctx, const char *value);
+void libcrun_context_set_io_fd(libcrun_context_t *, int stdin, int stdout, int stderr);
 const char *libcrun_context_get_pid_file (libcrun_context_t *ctx);
 void libcrun_context_set_notify_socket (libcrun_context_t *ctx, const char *value);
 void libcrun_context_set_handler (libcrun_context_t *ctx, const char *value);

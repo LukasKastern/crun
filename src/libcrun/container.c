@@ -1223,7 +1223,7 @@ setup_stdio (libcrun_context_t *ctx, libcrun_error_t *err)
 
   if(ctx->stdin_fd >= 0) {
     ret = dup2(ctx->stdin_fd, STDIN_FILENO);
-    if(ret <= 0) {
+    if(UNLIKELY (ret < 0)) {
       crun_make_error(err, errno, "stdin dup2");
       return ret;
     }
@@ -1231,7 +1231,7 @@ setup_stdio (libcrun_context_t *ctx, libcrun_error_t *err)
 
   if(ctx->stdout_fd >= 0) {
     ret = dup2(ctx->stdout_fd, STDOUT_FILENO);
-    if(ret <= 0) {
+    if(UNLIKELY (ret < 0)) {
       crun_make_error(err, errno, "stdout dup2");
       return ret;
     }
@@ -1239,12 +1239,13 @@ setup_stdio (libcrun_context_t *ctx, libcrun_error_t *err)
 
   if(ctx->stderr_fd >= 0) {
     ret = dup2(ctx->stderr_fd, STDERR_FILENO);
-    if(ret <= 0) {
+    if(UNLIKELY (ret < 0)) {
       crun_make_error(err, errno, "stderr dup2");
       return ret;
     }
   }
 
+  return 0;
 }
 
 /* Configure terminal and console for interactive containers.  */
