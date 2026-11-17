@@ -552,6 +552,13 @@ libcrun_container_free (libcrun_container_t *ctr)
   free (ctr);
 }
 
+void
+libcrun_context_set_io_fd(libcrun_context_t *ctx, int stdin, int stdout, int stderr) {
+  ctx->stdin_fd = stdin;
+  ctx->stdout_fd = stdout;
+  ctx->stderr_fd = stderr;
+}
+
 libcrun_context_t *
 libcrun_context_new (const char *id, const char *state_root, libcrun_error_t *err)
 {
@@ -563,6 +570,10 @@ libcrun_context_new (const char *id, const char *state_root, libcrun_error_t *er
   libcrun_context_set_state_root (ctx, state_root);
   libcrun_context_set_bundle (ctx, ".");
   ctx->fifo_exec_wait_fd = -1;
+
+  ctx->stderr_fd = -1;
+  ctx->stdout_fd = -1;
+  ctx->stdin_fd = -1;
 
   if (libcrun_init_logging (&ctx->output_handler, &ctx->output_handler_arg, id, NULL, err) < 0)
     {
@@ -1204,6 +1215,38 @@ setup_environment (runtime_spec_schema_config_schema *def, uid_t container_uid, 
   return 0;
 }
 
+/* Initialize the environment variables.  */
+static int
+setup_stdio (libcrun_context_t *ctx, libcrun_error_t *err)
+{
+  int ret;
+
+  if(ctx->stdin_fd >= 0) {
+    ret = dup2(ctx->stdin_fd, STDIN_FILENO);
+    if(ret <= 0) {
+      crun_make_error(err, errno, "stdin dup2");
+      return ret;
+    }
+  }
+
+  if(ctx->stdout_fd >= 0) {
+    ret = dup2(ctx->stdout_fd, STDOUT_FILENO);
+    if(ret <= 0) {
+      crun_make_error(err, errno, "stdout dup2");
+      return ret;
+    }
+  }
+
+  if(ctx->stderr_fd >= 0) {
+    ret = dup2(ctx->stderr_fd, STDERR_FILENO);
+    if(ret <= 0) {
+      crun_make_error(err, errno, "stderr dup2");
+      return ret;
+    }
+  }
+
+}
+
 /* Configure terminal and console for interactive containers.  */
 static int
 setup_terminal (struct container_entrypoint_s *entrypoint_args, libcrun_container_t *container,
@@ -1481,6 +1524,10 @@ container_init_setup (void *args, pid_t *own_pid, char *notify_socket,
     return ret;
 
   ret = setup_environment (def, container->container_uid, err);
+  if (UNLIKELY (ret < 0))
+    return ret;
+
+  ret = setup_stdio(entrypoint_args->context, err);
   if (UNLIKELY (ret < 0))
     return ret;
 

@@ -55,6 +55,10 @@ struct libcrun_context_s
   // Following context variable makes sure we get exact value of listen_fds irrespective of preserve_fds.
   int listen_fds;
 
+  int stdin_fd;
+  int stdout_fd;
+  int stderr_fd;
+
   crun_output_handler output_handler;
   void *output_handler_arg;
 
@@ -306,6 +310,7 @@ LIBCRUN_PUBLIC const char *libcrun_context_get_pid_file (libcrun_context_t *ctx)
 LIBCRUN_PUBLIC void libcrun_context_set_notify_socket (libcrun_context_t *ctx, const char *value);
 LIBCRUN_PUBLIC void libcrun_context_set_handler (libcrun_context_t *ctx, const char *value);
 LIBCRUN_PUBLIC void libcrun_context_set_preserve_fds (libcrun_context_t *ctx, int preserve_fds);
+LIBCRUN_PUBLIC void libcrun_context_set_io_fd (libcrun_context_t *, int stdin, int stdout, int stderr);
 LIBCRUN_PUBLIC int libcrun_context_get_preserve_fds (libcrun_context_t *ctx);
 LIBCRUN_PUBLIC void libcrun_context_set_listen_fds (libcrun_context_t *ctx, int listen_fds);
 LIBCRUN_PUBLIC void libcrun_context_set_args (libcrun_context_t *ctx, int argc, char **argv);
